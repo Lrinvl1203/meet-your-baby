@@ -581,11 +581,10 @@ class BabyFacePredictor {
                 await new Promise(resolve => setTimeout(resolve, 4000));
             }
 
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${this.apiKey}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'x-goog-api-key': this.apiKey
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     contents: [{ parts }]
@@ -618,7 +617,11 @@ class BabyFacePredictor {
 
             let imageFound = false;
             for (const part of data.candidates[0].content.parts) {
-                if (part.inline_data) {
+                if (part.inlineData) {
+                    generatedImages.push(`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`);
+                    imageFound = true;
+                    break;
+                } else if (part.inline_data) {
                     generatedImages.push(`data:${part.inline_data.mime_type};base64,${part.inline_data.data}`);
                     imageFound = true;
                     break;

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final API Test - Baby Face Generation</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        #imageResult img { max-width: 300px; margin: 10px 0; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        input { width: 100%; padding: 8px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Baby Face API Test (Working Pattern)</h1>
+
+    <div class="test-section">
+        <h3>API Configuration</h3>
+        <label>API Key:</label>
+        <input type="password" id="apiKey" value="AIzaSyCvzPbviRN7U3xsIYxfpTmnWEPp4eiVfAA" placeholder="Enter your API key">
+        <br>
+        <label>Upload Test Image:</label>
+        <input type="file" id="imageUpload" accept="image/*">
+        <div id="imagePreview"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Final Test: Baby Face Generation</h3>
+        <button onclick="testBabyFaceGeneration()">🍼 Test Baby Face Generation</button>
+        <div id="babyResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Raw Response</h3>
+        <textarea id="rawResponse" readonly></textarea>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+
+        function log(message) {
+            console.log(message);
+            const rawResponse = document.getElementById('rawResponse');
+            rawResponse.value += new Date().toLocaleTimeString() + ': ' + message + '\n';
+        }
+
+        // Image upload handler
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = `<img src="${uploadedImage}" style="max-width: 200px; margin-top: 10px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function testBabyFaceGeneration() {
+            const result = document.getElementById('babyResult');
+            const apiKey = document.getElementById('apiKey').value;
+
+            if (!apiKey) {
+                result.innerHTML = '<div class="error">Please enter API key</div>';
+                return;
+            }
+
+            if (!uploadedImage) {
+                result.innerHTML = '<div class="error">Please upload a test image first</div>';
+                return;
+            }
+
+            result.innerHTML = 'Testing baby face generation...';
+
+            try {
+                // Using the exact working pattern from natobanana file
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+
+                const prompt = `Generate a realistic baby face image based on the parent photo provided.
+                The baby should have:
+                - Cute baby features
+                - Soft skin
+                - Bright eyes
+                - Natural baby proportions
+                - A happy, innocent expression
+
+                Make it look like a real baby photo, photorealistic style.`;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                {
+                                    text: prompt
+                                },
+                                {
+                                    inline_data: {
+                                        mime_type: "image/jpeg",
+                                        data: uploadedImage.split(',')[1]
+                                    }
+                                }
+                            ]
+                        }],
+                        generationConfig: {
+                            temperature: 0.9,
+                            topK: 32,
+                            topP: 1,
+                            maxOutputTokens: 4096,
+                        }
+                    })
+                });
+
+                log(`Baby API Response Status: ${response.status}`);
+                const data = await response.json();
+                log(`Baby API Response: ${JSON.stringify(data, null, 2)}`);
+
+                if (response.ok && data.candidates && data.candidates[0]) {
+                    const parts = data.candidates[0].content.parts;
+                    let imageFound = false;
+
+                    for (const part of parts) {
+                        // Try both formats as found in working code
+                        if (part.inlineData) {
+                            const imgSrc = `data:image/png;base64,${part.inlineData.data}`;
+                            result.innerHTML = `<div class="success">✅ Baby face generated successfully!</div><img src="${imgSrc}" alt="Generated baby">`;
+                            imageFound = true;
+                            break;
+                        } else if (part.inline_data) {
+                            const imgSrc = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
+                            result.innerHTML = `<div class="success">✅ Baby face generated successfully!</div><img src="${imgSrc}" alt="Generated baby">`;
+                            imageFound = true;
+                            break;
+                        }
+                    }
+
+                    if (!imageFound) {
+                        result.innerHTML = `<div class="error">❌ No image in response<br>Response: ${JSON.stringify(data, null, 2)}</div>`;
+                    }
+                } else {
+                    result.innerHTML = `<div class="error">❌ Baby generation failed<br>Status: ${response.status}<br>Error: ${data.error?.message || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                log(`Baby API Error: ${error.message}`);
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

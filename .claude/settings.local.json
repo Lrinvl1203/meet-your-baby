@@ -9,7 +9,10 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "WebFetch(domain:ai.google.dev)",
-      "Bash(git commit -m \"$(cat <<''EOF''\n🔧 Fix Gemini API integration\n\n- Correct model name: ''models/gemini-2.5-flash-image-preview''\n- Update API endpoint and authentication headers\n- Fix data structure: inline_data and mime_type formats\n- Create comprehensive API usage guide\n- Update both vanilla JS and React TypeScript implementations\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\n🔧 Fix Gemini API integration\n\n- Correct model name: ''models/gemini-2.5-flash-image-preview''\n- Update API endpoint and authentication headers\n- Fix data structure: inline_data and mime_type formats\n- Create comprehensive API usage guide\n- Update both vanilla JS and React TypeScript implementations\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click"
     ],
     "deny": [],
     "ask": []

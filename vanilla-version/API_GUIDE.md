@@ -13,10 +13,9 @@ url: '...?key=${apiKey}'
 
 ### ✅ **수정됨 (올바른 방법)**
 ```javascript
-// 올바른 모델명과 헤더
-model: 'models/gemini-2.5-flash-image-preview'
-headers: { 'x-goog-api-key': apiKey }
-url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent'
+// 올바른 모델명과 URL 파라미터
+model: 'gemini-2.5-flash-image-preview'
+url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}'
 ```
 
 ## 🚀 **API 키 발급 방법**
@@ -30,11 +29,10 @@ url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-i
 
 ### REST API 호출 형식
 ```javascript
-const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=YOUR_API_KEY_HERE', {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': 'YOUR_API_KEY_HERE'
+        'Content-Type': 'application/json'
     },
     body: JSON.stringify({
         contents: [{
@@ -94,9 +92,8 @@ const response = await fetch('https://generativelanguage.googleapis.com/v1beta/m
 ### 1. 간단한 테스트 (cURL)
 ```bash
 curl -X POST \
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent' \
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=YOUR_API_KEY' \
   -H 'Content-Type: application/json' \
-  -H 'x-goog-api-key: YOUR_API_KEY' \
   -d '{
     "contents": [{
       "parts": [{
@@ -109,11 +106,10 @@ curl -X POST \
 ### 2. 브라우저 개발자 도구 테스트
 ```javascript
 // 브라우저 콘솔에서 실행
-fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=YOUR_API_KEY_HERE', {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': 'YOUR_API_KEY_HERE'
+        'Content-Type': 'application/json'
     },
     body: JSON.stringify({
         contents: [{

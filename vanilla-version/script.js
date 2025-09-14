@@ -531,9 +531,9 @@ class BabyFacePredictor {
         if (this.inputMode === 'together' && this.togetherImages.length > 0) {
             this.togetherImages.forEach(img => {
                 parts.push({
-                    inlineData: {
+                    inline_data: {
                         data: img.imageData.base64,
-                        mimeType: img.imageData.mimeType
+                        mime_type: img.imageData.mimeType
                     }
                 });
 
@@ -552,9 +552,9 @@ class BabyFacePredictor {
         } else if (this.fatherImages.length > 0 && this.motherImages.length > 0) {
             this.fatherImages.forEach(img => {
                 parts.push({
-                    inlineData: {
+                    inline_data: {
                         data: img.imageData.base64,
-                        mimeType: img.imageData.mimeType
+                        mime_type: img.imageData.mimeType
                     }
                 });
                 parts.push({ text: `This is the father at age ${img.age || 'unknown'}.` });
@@ -562,9 +562,9 @@ class BabyFacePredictor {
 
             this.motherImages.forEach(img => {
                 parts.push({
-                    inlineData: {
+                    inline_data: {
                         data: img.imageData.base64,
-                        mimeType: img.imageData.mimeType
+                        mime_type: img.imageData.mimeType
                     }
                 });
                 parts.push({ text: `This is the mother at age ${img.age || 'unknown'}.` });
@@ -576,16 +576,14 @@ class BabyFacePredictor {
         const generatedImages = [];
 
         for (let i = 0; i < numberOfImages; i++) {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${this.apiKey}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-goog-api-key': this.apiKey
                 },
                 body: JSON.stringify({
-                    contents: [{ parts }],
-                    generationConfig: {
-                        responseModalities: ['IMAGE', 'TEXT']
-                    }
+                    contents: [{ parts }]
                 })
             });
 
@@ -602,8 +600,8 @@ class BabyFacePredictor {
 
             let imageFound = false;
             for (const part of data.candidates[0].content.parts) {
-                if (part.inlineData) {
-                    generatedImages.push(`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`);
+                if (part.inline_data) {
+                    generatedImages.push(`data:${part.inline_data.mime_type};base64,${part.inline_data.data}`);
                     imageFound = true;
                     break;
                 }

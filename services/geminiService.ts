@@ -110,7 +110,7 @@ export const generateBabyFace = async (params: GenerateBabyFaceParams): Promise<
         const generatedImages: string[] = [];
         for (let i = 0; i < (numberOfImages || 1); i++) {
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash-image-preview',
+                model: 'models/gemini-2.5-flash-image-preview',
                 contents: { parts },
                 config: {
                     responseModalities: [Modality.IMAGE, Modality.TEXT],

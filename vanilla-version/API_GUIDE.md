@@ -130,23 +130,34 @@ fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-
 
 ## ❌ **일반적인 오류 및 해결법**
 
-### 1. **403 Forbidden**
+### 1. **429 Too Many Requests / Quota Exceeded** ⚠️
+```
+"You exceeded your current quota, please check your plan and billing details"
+"Quota exceeded for quota metric 'Generate Content API requests per day'"
+```
+**원인**: API 사용량 한도 초과 (무료: 15 req/min, 1500 req/day)
+
+**즉시 해결법**:
+1. **새 API 키 생성**: Google AI Studio → 기존 키 삭제 → 새 키 발급
+2. **시간 대기**: 24시간 후 할당량 재설정 대기
+3. **유료 플랜**: Pay-per-use 모델로 업그레이드
+
+**예방법**:
+- 요청 간 4초 간격 유지
+- 하루 최대 10-15회 테스트 권장
+- 불필요한 재시도 방지
+
+### 2. **403 Forbidden**
 ```
 "You don't have permission to access this resource"
 ```
 **해결법**: API 키가 잘못되었거나 권한이 없음. 새 API 키 생성
 
-### 2. **400 Bad Request**
+### 3. **400 Bad Request**
 ```
 "Invalid model name"
 ```
 **해결법**: 모델명을 `models/gemini-2.5-flash-image-preview`로 수정
-
-### 3. **429 Too Many Requests**
-```
-"Quota exceeded"
-```
-**해결법**: API 사용량 한도 초과. 잠시 후 재시도 또는 유료 플랜 고려
 
 ### 4. **Invalid image format**
 ```

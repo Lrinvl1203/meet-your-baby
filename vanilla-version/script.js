@@ -576,6 +576,11 @@ class BabyFacePredictor {
         const generatedImages = [];
 
         for (let i = 0; i < numberOfImages; i++) {
+            // Rate limiting: 요청 간 최소 간격 (4초)
+            if (i > 0) {
+                await new Promise(resolve => setTimeout(resolve, 4000));
+            }
+
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`, {
                 method: 'POST',
                 headers: {
@@ -588,7 +593,20 @@ class BabyFacePredictor {
             });
 
             if (!response.ok) {
-                const error = await response.json();
+                const errorText = await response.text();
+                console.error('API Error Response:', errorText);
+
+                // 할당량 초과 에러 특별 처리
+                if (response.status === 429 || errorText.includes('quota') || errorText.includes('rate limit') || errorText.includes('billing')) {
+                    throw new Error(`⚠️ API 할당량 초과!\n\n해결방법:\n1. 새 API 키 생성 (Google AI Studio)\n2. 24시간 후 재시도\n3. 유료 플랜 고려\n\n자세한 정보: https://ai.google.dev/gemini-api/docs/rate-limits`);
+                }
+
+                let error;
+                try {
+                    error = JSON.parse(errorText);
+                } catch {
+                    error = { error: { message: errorText } };
+                }
                 throw new Error(error.error?.message || 'API request failed');
             }
 

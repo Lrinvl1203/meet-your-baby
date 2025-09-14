@@ -1,0 +1,5 @@
+{
+  "name": "[Next ver working] Baby Face Predictor",
+  "description": "An application that predicts a baby's face by combining photos of the father and mother, using advanced AI to synthesize the result based on user-defined resemblance characteristics.",
+  "requestFramePermissions": []
+}

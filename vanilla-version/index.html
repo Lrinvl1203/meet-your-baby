@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Baby Face Predictor</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="min-h-screen bg-gray-50 flex flex-col items-center p-4">
+        <div class="w-full max-w-6xl mx-auto">
+            <!-- Header -->
+            <header class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-gray-800 tracking-tight flex items-center justify-center gap-3">
+                    <i class="fas fa-baby text-pink-500"></i>
+                    AI Baby Face Predictor
+                </h1>
+                <p class="mt-3 text-lg text-gray-500">See what your future baby might look like!</p>
+            </header>
+
+            <!-- API Key Input (Initially shown) -->
+            <div id="api-key-section" class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-700 text-center mb-4">
+                    <i class="fas fa-key text-indigo-500 mr-2"></i>
+                    Enter your Google Gemini API Key
+                </h3>
+                <div class="max-w-md mx-auto">
+                    <input type="password" id="api-key-input" placeholder="Enter your Gemini API key..."
+                           class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <button id="save-api-key" class="w-full mt-3 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                        Save API Key
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2 text-center">
+                        Your API key is stored locally and never sent to our servers
+                    </p>
+                </div>
+            </div>
+
+            <!-- Main App (Initially hidden) -->
+            <main id="main-app" class="bg-white rounded-2xl shadow-xl p-6" style="display: none;">
+                <!-- API Key Status -->
+                <div id="api-status" class="flex items-center justify-between mb-6 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <span class="text-green-700 font-medium">
+                        <i class="fas fa-check-circle mr-2"></i>API Key Connected
+                    </span>
+                    <button id="change-api-key" class="text-green-600 hover:text-green-800 text-sm">
+                        Change Key
+                    </button>
+                </div>
+
+                <!-- Upload Mode Selection -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-700 text-center mb-4">How would you like to upload photos?</h3>
+                    <div class="flex justify-center bg-gray-100 p-1.5 rounded-full w-full max-w-sm mx-auto">
+                        <button id="separate-mode" class="mode-btn active w-1/2 py-2 text-sm font-medium rounded-full transition-colors">
+                            Separate Photos
+                        </button>
+                        <button id="together-mode" class="mode-btn w-1/2 py-2 text-sm font-medium rounded-full transition-colors">
+                            Photo Together
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Photo Upload Sections -->
+                <div id="separate-upload" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div id="father-upload" class="upload-section">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Father's Photos</h3>
+                        <div class="upload-area">
+                            <input type="file" id="father-files" multiple accept="image/*" class="hidden">
+                            <label for="father-files" class="upload-label">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <span class="text-lg text-gray-600">Select Father's Photos</span>
+                                <span class="text-sm text-gray-500 mt-2">Click to upload multiple photos</span>
+                            </label>
+                        </div>
+                        <div id="father-previews" class="preview-container"></div>
+                    </div>
+
+                    <div id="mother-upload" class="upload-section">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Mother's Photos</h3>
+                        <div class="upload-area">
+                            <input type="file" id="mother-files" multiple accept="image/*" class="hidden">
+                            <label for="mother-files" class="upload-label">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <span class="text-lg text-gray-600">Select Mother's Photos</span>
+                                <span class="text-sm text-gray-500 mt-2">Click to upload multiple photos</span>
+                            </label>
+                        </div>
+                        <div id="mother-previews" class="preview-container"></div>
+                    </div>
+                </div>
+
+                <div id="together-upload" class="max-w-2xl mx-auto mb-8" style="display: none;">
+                    <div class="upload-section">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Parents' Photos Together</h3>
+                        <div class="upload-area">
+                            <input type="file" id="together-files" multiple accept="image/*" class="hidden">
+                            <label for="together-files" class="upload-label">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <span class="text-lg text-gray-600">Select Photos of Parents Together</span>
+                                <span class="text-sm text-gray-500 mt-2">Click to upload multiple photos</span>
+                            </label>
+                        </div>
+                        <div id="together-previews" class="preview-container"></div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 border-t pt-8 border-gray-200">
+                    <!-- Family Details -->
+                    <div class="space-y-6">
+                        <h3 class="font-semibold text-gray-700 text-lg">Family Details</h3>
+
+                        <!-- Parents Info -->
+                        <div class="space-y-4 p-3 bg-gray-50 rounded-lg border">
+                            <h4 class="font-medium text-gray-600 text-sm">Parents' Info</h4>
+                            <div>
+                                <label for="ethnicity" class="block text-sm font-medium text-gray-600 mb-1">Ethnicity / Race</label>
+                                <input type="text" id="ethnicity" class="form-input" placeholder="e.g., East Asian, Caucasian">
+                            </div>
+                            <div>
+                                <label for="nationality" class="block text-sm font-medium text-gray-600 mb-1">Nationality</label>
+                                <input type="text" id="nationality" class="form-input" placeholder="e.g., Korean, American">
+                            </div>
+                        </div>
+
+                        <!-- Baby Info -->
+                        <div class="space-y-4 p-3 bg-gray-50 rounded-lg border">
+                            <h4 class="font-medium text-gray-600 text-sm">Baby's Info</h4>
+                            <div>
+                                <label for="child-number" class="block text-sm font-medium text-gray-600 mb-1">Which child is this?</label>
+                                <input type="number" id="child-number" value="1" min="1" class="form-input">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Gender</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center space-x-2">
+                                        <input type="radio" name="gender" value="Male" class="radio-input">
+                                        <span>Male</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="radio" name="gender" value="Female" checked class="radio-input">
+                                        <span>Female</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Generation Mode -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-2">Generation Option</label>
+                                <div class="flex flex-col sm:flex-row gap-2 p-1 bg-gray-200 rounded-lg">
+                                    <button id="single-age-btn" class="generation-btn active flex-1 p-2 text-sm rounded-md transition-colors">
+                                        Fixed Age
+                                    </button>
+                                    <button id="age-progression-btn" class="generation-btn flex-1 p-2 text-sm rounded-md transition-colors">
+                                        Age Progression
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Single Age Options -->
+                            <div id="single-age-options">
+                                <div class="mb-4">
+                                    <label for="baby-age" class="block text-sm font-medium text-gray-600 mb-1">Age</label>
+                                    <select id="baby-age" class="form-input">
+                                        <option value="Newborn">Newborn</option>
+                                        <option value="1 year old">1 year old</option>
+                                        <option value="2 years old">2 years old</option>
+                                        <option value="custom">Custom age</option>
+                                    </select>
+                                    <div id="custom-age-input" style="display: none;">
+                                        <input type="number" id="custom-age" placeholder="Enter age in years" class="form-input mt-2">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="num-images" class="block text-sm font-medium text-gray-600 mb-1">Number of photos to generate (1-4)</label>
+                                    <input type="number" id="num-images" value="1" min="1" max="4" class="form-input">
+                                </div>
+                            </div>
+
+                            <!-- Age Progression Options -->
+                            <div id="age-progression-options" style="display: none;">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Select Ages to Generate</label>
+                                    <p class="text-xs text-gray-500 mb-2">Choose one or more ages for which you want to generate photos.</p>
+                                    <div id="preset-ages" class="flex flex-wrap gap-2">
+                                        <!-- Preset age buttons will be inserted here -->
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="age-progression-count" class="block text-sm font-medium text-gray-600 mb-1">Number of photos per age (1-2)</label>
+                                    <input type="number" id="age-progression-count" value="1" min="1" max="2" class="form-input">
+                                </div>
+                            </div>
+
+                            <!-- Resemblance Details -->
+                            <hr class="border-gray-200 -mx-3 my-4">
+                            <h4 class="font-medium text-gray-600 text-sm mb-2">Resemblance Details</h4>
+
+                            <div id="simple-resemblance">
+                                <label class="block text-sm font-medium text-gray-600 mb-2">Overall Resemblance</label>
+                                <input type="range" id="simple-slider" min="0" max="100" value="50" class="slider">
+                                <div class="flex justify-between text-sm text-gray-600 mt-1">
+                                    <span id="dad-percentage">Dad: 50%</span>
+                                    <span id="mom-percentage">Mom: 50%</span>
+                                </div>
+                            </div>
+
+                            <div id="detailed-resemblance" style="display: none;">
+                                <div id="detailed-sliders" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+                                    <!-- Detailed sliders will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prediction Type -->
+                    <div class="space-y-4">
+                        <h3 class="font-semibold text-gray-700 text-lg">Prediction Type</h3>
+                        <div class="flex flex-col gap-2 p-3 bg-gray-100 rounded-lg">
+                            <label class="prediction-option">
+                                <input type="radio" name="comparison-type" value="simple" checked>
+                                <div class="option-content">
+                                    <span class="font-medium">Simple</span>
+                                    <p class="text-xs text-gray-500">Overall resemblance percentage.</p>
+                                </div>
+                            </label>
+                            <label class="prediction-option">
+                                <input type="radio" name="comparison-type" value="detailed">
+                                <div class="option-content">
+                                    <span class="font-medium">Detailed</span>
+                                    <p class="text-xs text-gray-500">Feature-by-feature resemblance.</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Facial Feature Visualizer -->
+                        <div id="face-visualizer" class="bg-white rounded-lg shadow-inner p-4 min-h-64 flex items-center justify-center" style="display: none;">
+                            <svg id="face-svg" viewBox="0 0 200 200" class="w-full max-w-64 aspect-square">
+                                <!-- Face base -->
+                                <path d="M 100, 190 C 40, 190, 10, 150, 10, 100 C 10, 50, 40, 10, 100, 10 C 160, 10, 190, 50, 190, 100 C 190, 150, 160, 190, 100, 190 Z" fill="#FFDFC4" stroke="#4A4A4A" stroke-width="1.5" />
+
+                                <!-- Highlight areas -->
+                                <g id="highlight-areas">
+                                    <!-- Forehead -->
+                                    <path id="forehead-highlight" d="M 40, 60 Q 100, 30, 160, 60 L 160, 20 Q 100, 5, 40, 20 Z" class="feature-highlight" />
+                                    <!-- Eyes -->
+                                    <ellipse id="eyes-highlight" cx="100" cy="90" rx="45" ry="12" class="feature-highlight" />
+                                    <!-- Nose -->
+                                    <path id="nose-highlight" d="M 90, 100 L 110, 100 L 105, 125 L 95, 125 Z" class="feature-highlight" />
+                                    <!-- Mouth -->
+                                    <path id="mouth-highlight" d="M 80, 155 Q 100, 165, 120, 155 Q 100, 160, 80, 155 Z" class="feature-highlight" />
+                                    <!-- Add more highlight areas as needed -->
+                                </g>
+
+                                <!-- Facial features -->
+                                <g id="facial-features">
+                                    <!-- Ears -->
+                                    <path d="M 25, 80 Q 5, 100, 25, 120" fill="#FFDFC4" stroke="#4A4A4A" stroke-width="1.5" />
+                                    <path d="M 175, 80 Q 195, 100, 175, 120" fill="#FFDFC4" stroke="#4A4A4A" stroke-width="1.5" />
+                                    <!-- Eyes -->
+                                    <ellipse cx="75" cy="90" rx="15" ry="10" fill="white" stroke="#4A4A4A" stroke-width="1.5" />
+                                    <circle cx="75" cy="90" r="5" fill="#4A4A4A" />
+                                    <ellipse cx="125" cy="90" rx="15" ry="10" fill="white" stroke="#4A4A4A" stroke-width="1.5" />
+                                    <circle cx="125" cy="90" r="5" fill="#4A4A4A" />
+                                    <!-- Eyebrows -->
+                                    <path d="M 60, 70 Q 75, 65, 90, 70" fill="none" stroke="#4A4A4A" stroke-width="2.5" stroke-linecap="round" />
+                                    <path d="M 110, 70 Q 125, 65, 140, 70" fill="none" stroke="#4A4A4A" stroke-width="2.5" stroke-linecap="round" />
+                                    <!-- Nose -->
+                                    <path d="M 95, 110 C 100, 115, 105, 110" fill="none" stroke="#4A4A4A" stroke-width="1.5" stroke-linecap="round" />
+                                    <!-- Mouth -->
+                                    <path d="M 85, 155 Q 100, 160, 115, 155" fill="none" stroke="#4A4A4A" stroke-width="2" stroke-linecap="round" />
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="text-center border-t pt-8 border-gray-200">
+                    <button id="generate-btn" class="generate-button" disabled>
+                        <i class="fas fa-magic mr-2"></i>
+                        <span>Predict Baby's Face</span>
+                    </button>
+                    <div id="error-message" class="text-red-500 mt-4" style="display: none;"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="result-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button id="close-modal" class="modal-close">&times;</button>
+            <div id="result-container" class="result-container">
+                <!-- Loading state -->
+                <div id="loading-state" class="loading-state">
+                    <div class="spinner"></div>
+                    <p class="mt-4 text-gray-600 font-medium">AI is dreaming up your baby...</p>
+                    <p class="text-sm text-gray-500 mt-1">This can take a moment.</p>
+                </div>
+
+                <!-- Error state -->
+                <div id="error-state" class="error-state" style="display: none;">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                    <p class="font-bold text-red-500">Generation Failed</p>
+                    <p id="error-details" class="text-sm mt-1 text-red-400"></p>
+                </div>
+
+                <!-- Results -->
+                <div id="results-grid" class="results-grid" style="display: none;">
+                    <!-- Generated images will be inserted here -->
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="close-results" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
